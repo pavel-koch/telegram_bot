@@ -18,13 +18,6 @@ public class NotificationTask {
     @Column(name = "notification_date_time", nullable = false)
     private LocalDateTime notificationDateTime;
 
-    public NotificationTask(long id, String message, long chatId, LocalDateTime notificationDateTime) {
-        this.id = id;
-        this.message = message;
-        this.chatId = chatId;
-        this.notificationDateTime = notificationDateTime;
-    }
-
     public long getId() {
         return id;
     }
@@ -56,7 +49,7 @@ public class NotificationTask {
     public void setNotificationDateTime(LocalDateTime notificationDateTime) {
         this.notificationDateTime = notificationDateTime;
     }
-
+/*
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -78,5 +71,5 @@ public class NotificationTask {
                 ", chatId=" + chatId +
                 ", notificationDateTime=" + notificationDateTime +
                 '}';
-    }
+    }*/
 }
