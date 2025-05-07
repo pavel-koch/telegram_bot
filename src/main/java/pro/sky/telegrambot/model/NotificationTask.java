@@ -12,6 +12,7 @@ public class NotificationTask {
     private long id;
     @Column(nullable = false)
     private String message;
+
     @Column(name = "chat_id", nullable = false)
     private long chatId;
 
@@ -49,27 +50,4 @@ public class NotificationTask {
     public void setNotificationDateTime(LocalDateTime notificationDateTime) {
         this.notificationDateTime = notificationDateTime;
     }
-/*
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NotificationTask that = (NotificationTask) o;
-        return id == that.id && chatId == that.chatId && Objects.equals(message, that.message) && Objects.equals(notificationDateTime, that.notificationDateTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, message, chatId, notificationDateTime);
-    }
-
-    @Override
-    public String toString() {
-        return "NotificationTask{" +
-                "id=" + id +
-                ", message='" + message + '\'' +
-                ", chatId=" + chatId +
-                ", notificationDateTime=" + notificationDateTime +
-                '}';
-    }*/
 }
