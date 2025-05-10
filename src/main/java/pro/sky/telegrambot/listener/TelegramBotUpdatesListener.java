@@ -4,15 +4,11 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.message.TgSendMessage;
 import pro.sky.telegrambot.model.NotificationTask;
 import pro.sky.telegrambot.service.NotificationTaskService;
 
@@ -37,10 +33,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final TelegramBot telegramBot;
     private final NotificationTaskService notificationTaskService;
 
+    private final TgSendMessage tgSendMessage;
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, NotificationTaskService notificationTaskService) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, NotificationTaskService notificationTaskService, TgSendMessage tgSendMessage) {
         this.telegramBot = telegramBot;
         this.notificationTaskService = notificationTaskService;
+        this.tgSendMessage = tgSendMessage;
     }
 
     @PostConstruct
@@ -54,6 +52,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             updates.stream()
                     .filter(update -> update.message() != null)
                     .forEach(update -> {
+                        //перенести try сюда
+                        //вынести весь метод в отдельный приватный метод
                         logger.info("Handles update: {}", update);
 
                         Message message = update.message();
@@ -62,14 +62,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
 
                         if ("/start".equals(text)) {
-                            sendMessage(chatId, "Привет! Я могу планировать твои задачи! " +
+                            tgSendMessage.sendMessage(chatId, "Привет! Я могу планировать твои задачи! " +
                                     "Отправь мне ее в формате: ДД.ММ.ГГГГ 00:00 Сдать домашку");
                         } else if (text != null) {
                             Matcher matcher = pattern.matcher(text);
                             if (matcher.find()) {
                                 LocalDateTime dateTime = parse(matcher.group(1));
                                 if (Objects.isNull(dateTime)) {
-                                    sendMessage(chatId, "Неккоректный формат даты и/или времени!");
+                                    tgSendMessage.sendMessage(chatId, "Неккоректный формат даты и/или времени!");
                                 } else {
                                     String txt = matcher.group(2);
                                     NotificationTask notificationTask = new NotificationTask();
@@ -77,10 +77,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                     notificationTask.setMessage(txt);
                                     notificationTask.setNotificationDateTime(dateTime);
                                     notificationTaskService.save(notificationTask);
-                                    sendMessage(chatId, "Задача успешно добавлена!");
+                                    tgSendMessage.sendMessage(chatId, "Задача успешно добавлена!");
                                 }
                             } else {
-                                sendMessage(chatId, "Неккоректный формат сособщения!");
+                                tgSendMessage.sendMessage(chatId, "Неккоректный формат сособщения!");
                             }
                         }
 
@@ -100,11 +100,5 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
-    private void sendMessage(Long chatId, String message) {
-        SendMessage sendMessage = new SendMessage(chatId, message);
-        SendResponse sendResponse = telegramBot.execute(sendMessage);
-        if (!sendResponse.isOk()) {
-            logger.error("Error during sending message: {}", sendResponse.description());
-        }
-    }
+
 }
